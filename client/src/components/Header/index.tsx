@@ -14,6 +14,7 @@ import {
   Divider,
   Modal,
   Collapse,
+  Badge,
 } from "@mui/material";
 import { useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -24,6 +25,9 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import SearchOverlay from "./search";
+import CartDrawer from "./cart";
+import { useCart } from "../../context/CartContext";
 
 const Header = () => {
   const menItems = ["Trousers", "MMA Gloves", "T-Shirts", "Shorts"];
@@ -40,6 +44,10 @@ const Header = () => {
   
   const [mobileMenOpen, setMobileMenOpen] = useState(false);
   const [mobileWomenOpen, setMobileWomenOpen] = useState(false);
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const { cartCount } = useCart();
 
   return (
     <AppBar
@@ -170,11 +178,17 @@ const Header = () => {
           flex: 1, 
           justifyContent: "flex-end" 
         }}>
-          <IconButton size="small" sx={{ display: { xs: "inline-flex", sm: "inline-flex" } }}>
+          <IconButton 
+            size="small" 
+            onClick={() => setSearchOpen(true)}
+            sx={{ display: { xs: "inline-flex", sm: "inline-flex" } }}
+          >
             <SearchIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small">
-            <ShoppingCartIcon fontSize="small" />
+          <IconButton size="small" onClick={() => setCartOpen(true)}>
+            <Badge badgeContent={cartCount} color="error" overlap="circular">
+              <ShoppingCartIcon fontSize="small" />
+            </Badge>
           </IconButton>
           <IconButton size="small" onClick={() => setLoginOpen(true)}>
             <PersonIcon fontSize="small" />
@@ -274,6 +288,9 @@ const Header = () => {
             </Button>
           </Box>
         </Modal>
+
+        <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+        <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       </Toolbar>
     </AppBar>
   );

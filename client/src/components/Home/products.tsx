@@ -1,47 +1,173 @@
-import { Container, Grid, Typography, Box, MenuItem, FormControl, InputLabel, Select, Pagination } from "@mui/material";
-import ProductCard from "./detail"; // This will be the detailed card
-import { PRODUCTS } from "./contants";
+import { Card, CardMedia, CardContent, Typography, Box, IconButton, Chip, Fade, Rating } from "@mui/material";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useCart } from "../../context/CartContext";
 
-const ProductGrid = () => {
+const ProductCard = ({ product }: any) => {
+  const [hovered, setHovered] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.value || "");
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
+  const handleOpen = () => {
+    navigate(`/product/${product.id}`);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const colorName = product.colors.find((c: any) => c.value === selectedColor)?.name || "Default";
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      color: colorName,
+    });
+  };
+
   return (
-    <Box sx={{ bgcolor: "#fafafa", minHeight: "100vh", py: 4 }}>
-      <Container maxWidth="xl">
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
-          <Typography variant="h4" sx={{ fontWeight: 600 }}>
-            Our Products
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              Showing {PRODUCTS.length} products
+    <Card
+      onClick={handleOpen}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      sx={{
+        position: "relative",
+        borderRadius: 2,
+        overflow: "hidden",
+        cursor: "pointer",
+        transition: "all 0.3s ease",
+        boxShadow: hovered ? "0 10px 30px rgba(0,0,0,0.15)" : "0 2px 8px rgba(0,0,0,0.08)",
+        "&:hover": { transform: "translateY(-5px)" },
+      }}
+    >
+      <Box sx={{ position: "relative", overflow: "hidden" }}>
+        <CardMedia
+          component="img"
+          height="280"
+          image={product.image}
+          alt={product.name}
+          sx={{
+            transition: "transform 0.5s ease",
+            transform: hovered ? "scale(1.08)" : "scale(1)",
+          }}
+        />
+
+        {product.onSale && (
+          <Chip
+            label="SALE"
+            color="error"
+            size="small"
+            sx={{ position: "absolute", top: 10, left: 10, fontWeight: "bold" }}
+          />
+        )}
+
+        <Fade in={hovered}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
+            <IconButton size="small" sx={{ bgcolor: "white" }}>
+              <FavoriteBorderIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" sx={{ bgcolor: "white" }}>
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Fade>
+
+        <Fade in={hovered}>
+          <Box
+            onClick={handleAddToCart}
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              bgcolor: "rgba(0,0,0,0.8)",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              py: 1.5,
+              "&:hover": { bgcolor: "rgba(255, 61, 0, 0.9)" },
+            }}
+          >
+            <ShoppingCartIcon fontSize="small" />
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              ADD TO CART
             </Typography>
+          </Box>
+        </Fade>
+      </Box>
+
+      <CardContent>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+          <Typography variant="h6" sx={{ fontSize: "1rem", fontWeight: 600 }}>
+            {product.name}
           </Typography>
-          
-          <Box sx={{ display: "flex", gap: 2, minWidth: 200 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Sort By</InputLabel>
-              <Select label="Sort By" defaultValue="featured">
-                <MenuItem value="featured">Featured</MenuItem>
-                <MenuItem value="newest">Newest</MenuItem>
-                <MenuItem value="price-low">Price: Low to High</MenuItem>
-                <MenuItem value="price-high">Price: High to Low</MenuItem>
-                <MenuItem value="rating">Top Rated</MenuItem>
-              </Select>
-            </FormControl>
+
+          <Box>
+            {product.originalPrice && (
+              <Typography
+                variant="body2"
+                sx={{ textDecoration: "line-through", color: "text.disabled" }}
+              >
+                ${product.originalPrice}
+              </Typography>
+            )}
+
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                color: product.onSale ? "#ff3d00" : "text.primary",
+              }}
+            >
+              ${product.price}
+            </Typography>
           </Box>
         </Box>
 
-        <Grid container spacing={3}>
-          {PRODUCTS.map((product) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-              <ProductCard product={product} />
-            </Grid>
-          ))}
-        </Grid>
-
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-          <Pagination count={5} color="primary" size="large" />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+          <Rating value={product.rating} precision={0.5} size="small" readOnly />
+          <Typography variant="body2" color="text.secondary">
+            ({product.reviews})
+          </Typography>
         </Box>
-      </Container>
-    </Box>
+
+        <Box sx={{ display: "flex", gap: 1 }}>
+          {product.colors?.map((color: any, index: number) => (
+            <Box
+              key={index}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedColor(color.value);
+              }}
+              sx={{
+                width: 20,
+                height: 20,
+                borderRadius: "50%",
+                bgcolor: color.value,
+                border: selectedColor === color.value ? "2px solid black" : "2px solid transparent",
+                cursor: "pointer",
+              }}
+            />
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 
-export default ProductGrid;
+export default ProductCard;
