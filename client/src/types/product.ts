@@ -6,7 +6,7 @@ export interface IColor {
 export interface IProduct {
   message: boolean;
   _id?: string;
-  id: number;
+  id: string;
   name: string;
   brand?: string;
   category?: string;

@@ -241,7 +241,13 @@ const Header = () => {
             role="presentation"
           >
             <List>
-              <ListItem>
+              <ListItem
+                button
+                onClick={() => {
+                  setDrawerOpen(false);
+                  navigate("/");
+                }}
+              >
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   LOGO
                 </Typography>
