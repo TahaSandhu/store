@@ -1,16 +1,16 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectDB from './config/db';
 import productRoutes from './routes/productRoutes';
-
-dotenv.config();
 
 // Connect to Database
 connectDB();
 
 const app: Application = express();
-const PORT: string | number = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors());

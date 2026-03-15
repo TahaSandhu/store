@@ -1,5 +1,6 @@
-import { Container, Grid, CircularProgress, Box, Alert } from "@mui/material";
+import { Container, Grid, CircularProgress, Box, Alert, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import ProductCard from "./products";
 import HeroSlider from "../Hero";
@@ -9,11 +10,17 @@ const Home = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const keyword = searchParams.get("keyword");
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const { data } = await axios.get("http://localhost:8080/api/products");
+        const url = keyword 
+          ? `http://localhost:8080/api/products?keyword=${encodeURIComponent(keyword)}`
+          : "http://localhost:8080/api/products";
+        const { data } = await axios.get(url);
         setProducts(data);
         setError(null);
       } catch (err: any) {
@@ -25,12 +32,18 @@ const Home = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [keyword]);
 
   return (
     <>
       <HeroSlider />
       <Container sx={{ py: 8 }} maxWidth="lg">
+        {keyword && (
+          <Typography variant="h4" sx={{ mb: 4, fontWeight: 700 }}>
+            Search results for: "{keyword}"
+          </Typography>
+        )}
+        
         {error && (
           <Box sx={{ mb: 4 }}>
             <Alert severity="error">{error}</Alert>

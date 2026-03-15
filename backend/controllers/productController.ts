@@ -1,11 +1,21 @@
 import { Request, Response } from 'express';
 import Product from '../models/productModel';
 
-// @desc    Get all products
+// @desc    Get all products (optionally filtered by keyword)
 // @route   GET /api/products
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const products = await Product.find({});
+    const keyword = req.query.keyword
+      ? {
+          $or: [
+            { name: { $regex: req.query.keyword as string, $options: 'i' } },
+            { brand: { $regex: req.query.keyword as string, $options: 'i' } },
+            { category: { $regex: req.query.keyword as string, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    const products = await Product.find({ ...keyword });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });

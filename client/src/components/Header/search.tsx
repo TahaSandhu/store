@@ -11,6 +11,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 
+import { useNavigate } from "react-router-dom";
+
 interface SearchOverlayProps {
   open: boolean;
   onClose: () => void;
@@ -19,6 +21,7 @@ interface SearchOverlayProps {
 const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, onClose }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open) {
@@ -30,8 +33,11 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, onClose }) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Searching for:", searchQuery);
-    onClose();
+    if (searchQuery.trim()) {
+      navigate(`/?keyword=${encodeURIComponent(searchQuery.trim())}`);
+      onClose();
+      setSearchQuery("");
+    }
   };
 
   return (
