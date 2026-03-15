@@ -12,11 +12,11 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Modal,
   Collapse,
   Badge,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -28,17 +28,20 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import SearchOverlay from "./search";
 import CartDrawer from "./cart";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const menItems = ["Trousers", "MMA Gloves", "T-Shirts", "Shorts"];
   const womenItems = ["Leggings", "Sports Bra", "Tops", "Shorts"];
   const otherLinks = ["About", "Contact"];
 
-  const [anchorElMen, setAnchorElMen] = useState(null);
-  const [anchorElWomen, setAnchorElWomen] = useState(null);
+  const [anchorElMen, setAnchorElMen] = useState<null | HTMLElement>(null);
+  const [anchorElWomen, setAnchorElWomen] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-
+  
   const [menOpen, setMenOpen] = useState(false);
   const [womenOpen, setWomenOpen] = useState(false);
   
@@ -48,6 +51,14 @@ const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const { cartCount } = useCart();
+
+  const handleUserClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (user) {
+      setAnchorElUser(e.currentTarget);
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <AppBar
@@ -65,7 +76,7 @@ const Header = () => {
         }}
       >
         <Box sx={{ display: { xs: "flex", md: "none" }, flex: 1 }}>
-          <IconButton onClick={() => setDrawerOpen(true)} edge="start">
+          <IconButton onClick={() => setDrawerOpen(true)} edge="start" color="inherit">
             <MenuIcon />
           </IconButton>
         </Box>
@@ -80,7 +91,17 @@ const Header = () => {
             transform: { xs: "translateX(-50%)", md: "none" },
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: "bold", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
+          <Typography 
+            variant="h6" 
+            component={RouterLink} 
+            to="/"
+            sx={{ 
+              fontWeight: "bold", 
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+              color: "inherit",
+              textDecoration: "none"
+            }}
+          >
             LOGO
           </Typography>
         </Box>
@@ -97,7 +118,7 @@ const Header = () => {
           <Button
             color="inherit"
             onMouseEnter={(e) => {
-              setAnchorElMen(e.currentTarget as any);
+              setAnchorElMen(e.currentTarget);
               setMenOpen(true);
             }}
             onMouseLeave={() => setMenOpen(false)}
@@ -127,7 +148,7 @@ const Header = () => {
           <Button
             color="inherit"
             onMouseEnter={(e) => {
-              setAnchorElWomen(e.currentTarget as any);
+              setAnchorElWomen(e.currentTarget);
               setWomenOpen(true);
             }}
             onMouseLeave={() => setWomenOpen(false)}
@@ -182,17 +203,32 @@ const Header = () => {
             size="small" 
             onClick={() => setSearchOpen(true)}
             sx={{ display: { xs: "inline-flex", sm: "inline-flex" } }}
+            color="inherit"
           >
             <SearchIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => setCartOpen(true)}>
+          <IconButton size="small" onClick={() => setCartOpen(true)} color="inherit">
             <Badge badgeContent={cartCount} color="error" overlap="circular">
               <ShoppingCartIcon fontSize="small" />
             </Badge>
           </IconButton>
-          <IconButton size="small" onClick={() => setLoginOpen(true)}>
-            <PersonIcon fontSize="small" />
+          <IconButton size="small" onClick={handleUserClick} color="inherit">
+            {user ? (
+              <Typography variant="body2" sx={{ fontWeight: 600, ml: 0.5, display: { xs: 'none', sm: 'block' } }}>
+                {user.name.split(' ')[0]}
+              </Typography>
+            ) : null}
+            <PersonIcon fontSize="small" sx={{ ml: 0.5 }} />
           </IconButton>
+
+          <Menu
+            anchorEl={anchorElUser}
+            open={Boolean(anchorElUser)}
+            onClose={() => setAnchorElUser(null)}
+          >
+            <MenuItem onClick={() => { setAnchorElUser(null); navigate("/profile"); }}>Profile</MenuItem>
+            <MenuItem onClick={() => { setAnchorElUser(null); logout(); }}>Logout</MenuItem>
+          </Menu>
         </Box>
 
         <Drawer
@@ -203,10 +239,15 @@ const Header = () => {
           <Box
             sx={{ width: 280 }}
             role="presentation"
-            onKeyDown={() => setDrawerOpen(false)}
           >
             <List>
-              <ListItem>
+              <ListItem
+                button
+                onClick={() => {
+                  setDrawerOpen(false);
+                  navigate("/");
+                }}
+              >
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   LOGO
                 </Typography>
@@ -253,41 +294,29 @@ const Header = () => {
                 button 
                 onClick={() => {
                   setDrawerOpen(false);
-                  setLoginOpen(true);
+                  if (user) {
+                    navigate("/profile");
+                  } else {
+                    navigate("/login");
+                  }
                 }}
               >
-                <ListItemText primary="Login" />
+                <ListItemText primary={user ? "Profile" : "Login"} />
               </ListItem>
+              {user && (
+                <ListItem 
+                  button 
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    logout();
+                  }}
+                >
+                  <ListItemText primary="Logout" />
+                </ListItem>
+              )}
             </List>
           </Box>
         </Drawer>
-
-        <Modal open={loginOpen} onClose={() => setLoginOpen(false)}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: { xs: "90%", sm: 400 },
-              maxWidth: 400,
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: { xs: 3, sm: 4 },
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Login
-            </Typography>
-            <Button fullWidth variant="contained" sx={{ mb: 1 }}>
-              Login with Email
-            </Button>
-            <Button fullWidth variant="outlined">
-              Login with Google
-            </Button>
-          </Box>
-        </Modal>
 
         <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
         <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />

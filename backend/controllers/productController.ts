@@ -26,7 +26,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 // @route   GET /api/products/:id
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const product = await Product.findOne({ id: Number(req.params.id) });
+    const product = await Product.findOne({ id: req.params.id });
     if (product) {
       res.json(product);
     } else {

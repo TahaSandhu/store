@@ -6,7 +6,7 @@ dotenv.config();
 
 const PRODUCTS = [
   {
-    id: 1,
+    id: "prod-001",
     name: "Classic Cotton T-Shirt",
     brand: "UrbanWear",
     category: "T-Shirts",
@@ -29,7 +29,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 2,
+    id: "prod-002",
     name: "Slim Fit Jeans",
     brand: "DenimCo",
     category: "Jeans",
@@ -52,7 +52,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 3,
+    id: "prod-003",
     name: "Leather Jacket",
     brand: "MotoStyle",
     category: "Jackets",
@@ -74,7 +74,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 4,
+    id: "prod-004",
     name: "Running Shoes",
     brand: "RunMax",
     category: "Shoes",
@@ -97,7 +97,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 5,
+    id: "prod-005",
     name: "Wool Sweater",
     brand: "NordicWear",
     category: "Sweaters",
@@ -120,7 +120,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 6,
+    id: "prod-006",
     name: "Cargo Pants",
     brand: "TrendSetter",
     category: "Pants",
@@ -139,7 +139,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 7,
+    id: "prod-007",
     name: "Summer Dress",
     brand: "Bloom",
     category: "Dresses",
@@ -158,7 +158,7 @@ const PRODUCTS = [
     ],
   },
   {
-    id: 8,
+    id: "prod-008",
     name: "Sports Hoodie",
     brand: "ActiveLite",
     category: "Hoodies",
@@ -183,16 +183,18 @@ const seedDatabase = async (): Promise<void> => {
     if (!process.env.MONGO_URI) {
       throw new Error('MONGO_URI is not defined');
     }
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI, {
+      dbName: 'ecommer',
+    });
     console.log('Connected to MongoDB for seeding...');
 
-    await Product.deleteMany();
+    await Product.deleteMany({});
     console.log('Old products cleared.');
 
     await Product.insertMany(PRODUCTS);
     console.log('Initial products seeded successfully!');
 
-    mongoose.connection.close();
+    await mongoose.connection.close();
     console.log('Connection closed.');
   } catch (error) {
     console.error('Error seeding database:', error);

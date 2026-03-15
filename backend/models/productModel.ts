@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
+import crypto from 'crypto';
 
 export interface IColor {
   name: string;
@@ -6,7 +7,7 @@ export interface IColor {
 }
 
 export interface IProduct extends Document {
-  id: number;
+  id: string;
   name: string;
   brand?: string;
   category?: string;
@@ -24,7 +25,7 @@ export interface IProduct extends Document {
 }
 
 const productSchema: Schema<IProduct> = new Schema({
-  id: { type: Number, required: true, unique: true },
+  id: { type: String, default: () => crypto.randomUUID(), unique: true },
   name: { type: String, required: true },
   brand: { type: String },
   category: { type: String },

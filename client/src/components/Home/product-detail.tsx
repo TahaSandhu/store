@@ -103,7 +103,6 @@ const ProductDetail = () => {
       </Breadcrumbs>
 
       <Grid container spacing={6}>
-        {/* Left Column: Gallery */}
         <Grid item xs={12} md={6}>
           <Box sx={{ position: "sticky", top: 20 }}>
             <Box
@@ -146,7 +145,6 @@ const ProductDetail = () => {
           </Box>
         </Grid>
 
-        {/* Right Column: Details */}
         <Grid item xs={12} md={6}>
           <Box>
             <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: 2 }}>
