@@ -16,6 +16,9 @@ backend/node_modules
 dist
 client/dist
 backend/dist
+build
+client/build
+backend/build
 dist-ssr
 
 # Environment variables

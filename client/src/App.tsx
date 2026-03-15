@@ -4,6 +4,7 @@ import Header from "./components/Header"
 import Footer from "./components/Footer";
 import HeroSlider from "./components/Hero";
 import Home from "./components/Home";
+import ProductDetail from "./components/Home/product-detail";
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
       <HeroSlider/>
       <Routes>
         <Route path="/" element={<Home/>} />
-
+        <Route path="/product/:id" element={<ProductDetail/>} />
       </Routes>
       <Footer/>
     </BrowserRouter>
