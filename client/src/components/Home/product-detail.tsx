@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
+import axios from "axios";
 import {
   Container,
   Typography,
@@ -13,24 +14,63 @@ import {
   Divider,
   ToggleButton,
   ToggleButtonGroup,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ReplayIcon from "@mui/icons-material/Replay";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { PRODUCTS } from "./contants";
 import { useCart } from "../../context/CartContext";
+import { IProduct, IColor } from "../../types/product";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = PRODUCTS.find((p) => p.id.toString() === id);
+  const [product, setProduct] = useState<IProduct | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCart();
 
-  const [selectedImage, setSelectedImage] = useState(product?.image || "");
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "");
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.value || "");
+  const [selectedImage, setSelectedImage] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
-  if (!product) return (
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:8080/api/products/${id}`);
+        setProduct(data);
+        if (data) {
+          setSelectedImage(data.image);
+          setSelectedSize(data.sizes?.[0] || "");
+          setSelectedColor(data.colors?.[0]?.value || "");
+        }
+        setError(null);
+      } catch (err: any) {
+        console.error("Error fetching product:", err);
+        setError(err.response?.data?.message || err.message || "Failed to load product details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) return (
+    <Box sx={{ display: "flex", justifyContent: "center", py: 20 }}>
+      <CircularProgress color="inherit" />
+    </Box>
+  );
+
+  if (error) return (
+    <Container sx={{ py: 10, textAlign: "center" }}>
+      <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+      <Button component={RouterLink} to="/" variant="contained">Back to Store</Button>
+    </Container>
+  );
+
+  if (!product || product.message) return (
     <Container sx={{ py: 10, textAlign: "center" }}>
       <Typography variant="h5">Product not found</Typography>
       <Button component={RouterLink} to="/" sx={{ mt: 2 }}>Back to Store</Button>
@@ -83,7 +123,7 @@ const ProductDetail = () => {
               />
             </Box>
             <Stack direction="row" spacing={2} sx={{ overflowX: "auto", pb: 1 }}>
-              {images.map((img, index) => (
+              {images.map((img: string, index: number) => (
                 <Box
                   key={index}
                   onClick={() => setSelectedImage(img)}
@@ -150,10 +190,10 @@ const ProductDetail = () => {
             {/* Color Selection */}
             <Box sx={{ mb: 4 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-                SELECT COLOR: {product.colors.find(c => c.value === selectedColor)?.name}
+                SELECT COLOR: {product.colors.find((c: IColor) => c.value === selectedColor)?.name}
               </Typography>
               <Stack direction="row" spacing={1.5}>
-                {product.colors.map((color, index) => (
+                {product.colors.map((color: IColor, index: number) => (
                   <Box
                     key={index}
                     onClick={() => setSelectedColor(color.value)}
@@ -190,7 +230,7 @@ const ProductDetail = () => {
                 aria-label="product size"
                 sx={{ gap: 1, flexWrap: "wrap", display: "flex", "& .MuiToggleButtonGroup-grouped": { border: "1px solid #ddd !important", borderRadius: "8px !important" } }}
               >
-                {product?.sizes?.map((size) => (
+                {product?.sizes?.map((size: string) => (
                   <ToggleButton
                     key={size}
                     value={size}

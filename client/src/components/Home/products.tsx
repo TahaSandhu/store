@@ -1,14 +1,20 @@
+
 import { Card, CardMedia, CardContent, Typography, Box, IconButton, Chip, Fade, Rating } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useCart } from "../../context/CartContext";
+import { IProduct } from "../../types/product";
 
-const ProductCard = ({ product }: any) => {
+interface ProductCardProps {
+  product: IProduct;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [hovered, setHovered] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.value || "");
+  const [selectedColor, setSelectedColor] = useState<string>(product?.colors?.[0]?.value || "");
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
