@@ -8,7 +8,7 @@ import ProductDetail from "./components/Home/product-detail";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/store">
       <MessageBar />
       <Header />
       <HeroSlider/>
